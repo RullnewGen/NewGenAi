@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef3f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0f16" media="(prefers-color-scheme: dark)">
+<title>Tanya</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --base:#eef3f9;
+    --bg1:#bcdcff; --bg2:#ffdcc7; --bg3:#c9f2e4;
+    --text:#10141a;
+    --text2:rgba(60,60,67,.62);
+    --glass:rgba(255,255,255,.55);
+    --glass-strong:rgba(255,255,255,.78);
+    --glass-solid:rgba(246,249,253,.97);
+    --glass-border:rgba(255,255,255,.7);
+    --hair:rgba(60,60,67,.14);
+    --field:rgba(120,120,128,.12);
+    --bubble-ai:rgba(255,255,255,.66);
+    --blue:#0a7aff;
+    --red:#ff3b30;
+    --shadow:0 10px 32px rgba(25,45,85,.14);
+    --hi:rgba(255,255,255,.6);
+    --safe-b:env(safe-area-inset-bottom, 0px);
+    --ease:cubic-bezier(.2,.9,.25,1.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --base:#0b0f16;
+      --bg1:#12427a; --bg2:#0f4a4a; --bg3:#4a3220;
+      --text:#f2f4f8;
+      --text2:rgba(235,235,245,.6);
+      --glass:rgba(32,36,46,.55);
+      --glass-strong:rgba(34,38,50,.82);
+      --glass-solid:rgba(26,29,38,.97);
+      --glass-border:rgba(255,255,255,.14);
+      --hair:rgba(255,255,255,.12);
+      --field:rgba(255,255,255,.1);
+      --bubble-ai:rgba(255,255,255,.1);
+      --blue:#0a84ff;
+      --red:#ff6961;
+      --shadow:0 10px 32px rgba(0,0,0,.45);
+      --hi:rgba(255,255,255,.12);
+    }
+  }
+  :root.kb{ --safe-b:0px; }
+  :root.tanpa-kaca{ --glass:var(--glass-solid); --glass-strong:var(--glass-solid); }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{
+    margin:0;height:100%;overflow:hidden;overscroll-behavior:none;
+    background:var(--base);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    letter-spacing:-.01em;
+    -webkit-text-size-adjust:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;touch-action:manipulation}
+
+  /* Latar bergerak pelan (hanya transform, hemat baterai) */
+  .wall{
+    position:fixed;inset:-25%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(40% 35% at 20% 25%, var(--bg1) 0%, transparent 70%),
+      radial-gradient(35% 35% at 80% 20%, var(--bg2) 0%, transparent 70%),
+      radial-gradient(45% 40% at 65% 85%, var(--bg3) 0%, transparent 70%);
+    animation:melayang 40s ease-in-out infinite alternate;
+    will-change:transform;
+  }
+  @keyframes melayang{
+    from{transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1)}
+    to{transform:translate3d(3%,3%,0) rotate(8deg) scale(1.08)}
+  }
+
+  .kaca{
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    backdrop-filter:blur(24px) saturate(180%);
+  }
+
+  .app{
+    position:fixed;left:0;right:0;margin:0 auto;z-index:1;overflow:hidden;
+    top:var(--app-top,0px);
+    height:var(--app-h,100dvh);
+    max-width:760px;
+  }
+
+  /* Header */
+  .bar{
+    position:absolute;top:0;left:0;right:0;z-index:3;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+    border-bottom:1px solid var(--hair);
+  }
+  .bar h1{margin:0;font-size:17px;font-weight:600;text-align:center}
+  .bar .kanan{text-align:right}
+  .teks-btn{
+    background:none;border:0;padding:6px 0;color:var(--blue);font-size:17px;cursor:pointer;
+    transition:opacity .2s;
+  }
+  .teks-btn:active{opacity:.35}
+
+  /* Area chat */
+  .gulir{
+    position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-top:calc(var(--head-h,64px) + 14px);
+    padding-bottom:calc(var(--comp-h,76px) + 14px);
+  }
+  .daftar{display:flex;flex-direction:column;gap:8px;padding:0 14px;min-height:100%}
+
+  .gel{
+    max-width:82%;padding:10px 14px;border-radius:20px;
+    font-size:16px;line-height:1.45;
+    white-space:pre-wrap;overflow-wrap:anywhere;
+    animation:masuk .42s var(--ease) both;
+  }
+  .gel.tanpa-anim{animation:none}
+  @keyframes masuk{
+    from{opacity:0;transform:translateY(12px) scale(.96)}
+    to{opacity:1;transform:none}
+  }
+  .gel.saya{
+    align-self:flex-end;transform-origin:bottom right;
+    background:var(--blue);color:#fff;
+    border-bottom-right-radius:6px;
+    box-shadow:0 4px 14px rgba(10,122,255,.28);
+  }
+  .gel.ai{
+    align-self:flex-start;transform-origin:bottom left;
+    background:var(--bubble-ai);
+    border:1px solid var(--glass-border);
+    border-bottom-left-radius:6px;
+    box-shadow:0 4px 16px rgba(25,45,85,.07), inset 0 1px 0 var(--hi);
+  }
+  .gel.galat{
+    align-self:flex-start;transform-origin:bottom left;
+    background:rgba(255,59,48,.13);
+    border:1px solid rgba(255,59,48,.28);
+    color:var(--red);
+    border-bottom-left-radius:6px;
+  }
+  .gel.mengetik{display:flex;gap:5px;align-items:center;padding:15px 16px}
+  .mengetik i{
+    width:7px;height:7px;border-radius:50%;background:var(--text2);
+    animation:lompat 1.2s infinite ease-in-out;
+  }
+  .mengetik i:nth-child(2){animation-delay:.15s}
+  .mengetik i:nth-child(3){animation-delay:.3s}
+  @keyframes lompat{
+    0%,60%,100%{transform:translateY(0);opacity:.4}
+    30%{transform:translateY(-4px);opacity:1}
+  }
+
+  .kosong{
+    margin:14vh auto 0;max-width:300px;padding:22px 20px;border-radius:24px;
+    text-align:center;color:var(--text2);font-size:15px;line-height:1.45;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--shadow), inset 0 1px 0 var(--hi);
+    animation:masuk .5s var(--ease) both;
+  }
+  .kosong strong{display:block;color:var(--text);font-size:19px;font-weight:600;margin-bottom:6px}
+
+  /* Kotak tulis mengambang */
+  .komposer{
+    position:absolute;left:0;right:0;bottom:0;z-index:3;pointer-events:none;
+    padding:0 12px calc(10px + var(--safe-b));
+  }
+  .pil{
+    pointer-events:auto;
+    display:flex;align-items:flex-end;gap:8px;
+    padding:6px 6px 6px 16px;border-radius:26px;
+    border:1px solid var(--glass-border);
+    box-shadow:var(--shadow), inset 0 1px 0 var(--hi);
+    transition:box-shadow .25s;
+  }
+  .pil:focus-within{
+    box-shadow:var(--shadow), inset 0 1px 0 var(--hi), 0 0 0 3px rgba(10,122,255,.25);
+  }
+  #input{
+    flex:1;min-width:0;border:0;outline:0;resize:none;background:transparent;color:inherit;
+    font:inherit;font-size:16px;line-height:1.4;padding:7px 0;max-height:120px;
+  }
+  #input::placeholder{color:var(--text2)}
+  #kirim{
+    flex:none;width:36px;height:36px;border:0;border-radius:50%;
+    background:var(--blue);color:#fff;display:grid;place-items:center;cursor:pointer;
+    transition:transform .18s var(--ease), opacity .2s;
+  }
+  #kirim:active:not(:disabled){transform:scale(.86)}
+  #kirim:disabled{opacity:.3;cursor:default}
+
+  /* Lembar pengaturan */
+  dialog{
+    border:0;padding:0;background:transparent;color:var(--text);
+    width:min(92vw,420px);max-width:none;overflow:visible;
+  }
+  dialog::backdrop{
+    background:rgba(0,0,0,.3);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    animation:pudar .3s ease both;
+  }
+  @keyframes pudar{from{opacity:0}to{opacity:1}}
+  .kartu{
+    padding:20px;border-radius:28px;
+    max-height:calc(var(--app-h,100dvh) - 32px);overflow-y:auto;
+    background:var(--glass-strong);
+    -webkit-backdrop-filter:blur(30px) saturate(180%);
+    backdrop-filter:blur(30px) saturate(180%);
+    border:1px solid var(--glass-border);
+    box-shadow:0 24px 70px rgba(0,0,0,.28), inset 0 1px 0 var(--hi);
+  }
+  dialog[open] .kartu{animation:naik .4s var(--ease) both}
+  @keyframes naik{
+    from{opacity:0;transform:translateY(26px) scale(.95)}
+    to{opacity:1;transform:none}
+  }
+  .kartu h2{margin:0 0 2px;font-size:20px;font-weight:600}
+  .kartu .sub{margin:0 0 6px;font-size:14px;color:var(--text2)}
+  .kartu label{display:block;margin:14px 0 6px 4px;font-size:13px;color:var(--text2)}
+  .kartu input{
+    width:100%;padding:12px 14px;border:0;border-radius:14px;
+    background:var(--field);color:var(--text);font:inherit;font-size:16px;
+    outline:0;transition:box-shadow .2s;
+  }
+  .kartu input:focus{box-shadow:0 0 0 3px rgba(10,122,255,.35)}
+  .kartu input::placeholder{color:var(--text2)}
+  .peringatan{margin:14px 4px 0;font-size:12.5px;line-height:1.45;color:var(--text2)}
+  .baris{display:flex;gap:10px;margin-top:18px}
+  .baris button{
+    flex:1;padding:13px;border:0;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;
+    transition:transform .18s var(--ease), opacity .2s;
+  }
+  .baris button:active{transform:scale(.96)}
+  .baris .sekunder{background:var(--field);color:var(--blue)}
+  .baris .utama{background:var(--blue);color:#fff}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="wall" aria-hidden="true"></div>
+
+<div class="app" id="app">
+  <header class="bar kaca" id="head">
+    <div><button type="button" class="teks-btn" id="btnBaru">Baru</button></div>
+    <h1>Tanya</h1>
+    <div class="kanan"><button type="button" class="teks-btn" id="btnAtur">Atur</button></div>
+  </header>
+
+  <main class="gulir" id="scroller" aria-live="polite">
+    <div class="daftar" id="list"></div>
+  </main>
+
+  <div class="komposer" id="comp">
+    <form class="pil kaca" id="tulis" autocomplete="off">
+      <textarea id="input" rows="1" placeholder="Tulis pesan" enterkeyhint="send" aria-label="Pesan"></textarea>
+      <button type="submit" id="kirim" aria-label="Kirim" disabled>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="formAtur" class="kartu">
+    <h2>Pengaturan</h2>
+    <p class="sub">Disimpan hanya di browser ini.</p>
+
+    <label for="url">API URL</label>
+    <input id="url" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://api.openai.com/v1/chat/completions">
+
+    <label for="key">API Key</label>
+    <input id="key" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="sk-...">
+
+    <label for="model">Model</label>
+    <input id="model" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="gpt-4o-mini">
+
+    <p class="peringatan">Key dipakai langsung dari browser, jadi bisa dilihat siapa pun yang memegang perangkat ini. Jangan bagikan file ini atau unggah ke hosting publik setelah key diisi.</p>
+
+    <div class="baris">
+      <button type="button" class="sekunder" id="batal" autofocus>Tutup</button>
+      <button type="submit" class="utama">Simpan</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+
+  var K_SET = "tanya.pengaturan";
+  var K_RIW = "tanya.riwayat";
+  var MAKS_SIMPAN = 40;   // pesan yang disimpan di perangkat
+  var MAKS_KIRIM  = 20;   // pesan terakhir yang dikirim ke API (hemat token)
+  var WAKTU_HABIS = 60000;
+
+  function $(id){ return document.getElementById(id); }
+  var root = document.documentElement;
+  var scroller = $("scroller"), list = $("list"), head = $("head"), comp = $("comp");
+  var form = $("tulis"), input = $("input"), kirim = $("kirim"), dlg = $("dlg");
+  var inUrl = $("url"), inKey = $("key"), inModel = $("model");
+
+  var riwayat = [];
+  var sibuk = false;
+  var ctrl = null;
+  var kosongEl = null;
+
+  /* ---------- penyimpanan lokal (aman bila diblokir) ---------- */
+  function baca(k, def){
+    try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }
+    catch(e){ return def; }
+  }
+  function simpanLokal(k, v){
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch(e){ return false; }
+  }
+  function hapusLokal(k){ try { localStorage.removeItem(k); } catch(e){} }
+  function simpanRiwayat(){
+    if (riwayat.length > MAKS_SIMPAN) riwayat = riwayat.slice(-MAKS_SIMPAN);
+    simpanLokal(K_RIW, riwayat);
+  }
+
+  /* ---------- ukuran layar & keyboard (iOS/Android) ---------- */
+  if (!(window.CSS && CSS.supports && (CSS.supports("backdrop-filter","blur(1px)") || CSS.supports("-webkit-backdrop-filter","blur(1px)")))) {
+    root.classList.add("tanpa-kaca");
+  }
+  function sesuaikan(){
+    var vv = window.visualViewport;
+    var h = vv ? vv.height : window.innerHeight;
+    var top = vv ? vv.offsetTop : 0;
+    root.style.setProperty("--app-h", Math.round(h) + "px");
+    root.style.setProperty("--app-top", Math.round(top) + "px");
+    root.classList.toggle("kb", !!(vv && (window.innerHeight - vv.height) > 120));
+    if (document.activeElement === input) scroller.scrollTop = scroller.scrollHeight;
+  }
+  if (window.visualViewport){
+    visualViewport.addEventListener("resize", sesuaikan);
+    visualViewport.addEventListener("scroll", sesuaikan);
+  }
+  window.addEventListener("resize", sesuaikan);
+  sesuaikan();
+
+  function ukur(){
+    root.style.setProperty("--head-h", head.offsetHeight + "px");
+    root.style.setProperty("--comp-h", comp.offsetHeight + "px");
+  }
+  if (window.ResizeObserver){
+    var ro = new ResizeObserver(ukur);
+    ro.observe(head); ro.observe(comp);
+  }
+  ukur();
+
+  /* ---------- tampilan ---------- */
+  function halus(){
+    return (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth";
+  }
+  function gulirBawah(pakaiHalus){
+    scroller.scrollTo({ top: scroller.scrollHeight, behavior: pakaiHalus ? halus() : "auto" });
+  }
+  function gulirKeJawaban(el){
+    var lihat = scroller.clientHeight - head.offsetHeight - comp.offsetHeight;
+    if (el.offsetHeight > lihat * 0.8){
+      var atas = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+               + scroller.scrollTop - head.offsetHeight - 12;
+      scroller.scrollTo({ top: atas, behavior: halus() });
+    } else {
+      gulirBawah(true);
+    }
+  }
+  function tampilkanKosong(judul, isi){
+    list.textContent = "";
+    kosongEl = document.createElement("div");
+    kosongEl.className = "kosong";
+    var j = document.createElement("strong");
+    j.textContent = judul;
+    kosongEl.appendChild(j);
+    kosongEl.appendChild(document.createTextNode(isi));
+    list.appendChild(kosongEl);
+  }
+  function gelembung(jenis, teks, animasi){
+    if (kosongEl){ kosongEl.remove(); kosongEl = null; }
+    var d = document.createElement("div");
+    d.className = "gel " + jenis + (animasi === false ? " tanpa-anim" : "");
+    d.textContent = teks;
+    list.appendChild(d);
+    return d;
+  }
+  function gelembungMengetik(){
+    if (kosongEl){ kosongEl.remove(); kosongEl = null; }
+    var d = document.createElement("div");
+    d.className = "gel ai mengetik";
+    d.setAttribute("aria-label", "Sedang menulis jawaban");
+    for (var i = 0; i < 3; i++) d.appendChild(document.createElement("i"));
+    list.appendChild(d);
+    return d;
+  }
+  function perbaruiTombol(){
+    kirim.disabled = sibuk || !input.value.trim();
+  }
+  function setSibuk(b){
+    sibuk = b;
+    perbaruiTombol();
+  }
+  function ubahTinggi(){
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  }
+
+  /* ---------- API ---------- */
+  function rapikanUrl(u){
+    u = u.trim();
+    // jika hanya sampai /v1, lengkapi ke endpoint chat
+    if (/\/v1\/?$/.test(u)) return u.replace(/\/+$/, "") + "/chat/completions";
+    return u;
+  }
+  function riwayatUntukApi(){
+    var a = riwayat.slice(-MAKS_KIRIM);
+    while (a.length && a[0].role !== "user") a.shift();
+    return a;
+  }
+  function ambilTeks(data){
+    var c = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (typeof c === "string") return c;
+    if (Array.isArray(c)){
+      return c.map(function(p){ return typeof p === "string" ? p : (p && p.text) || ""; }).join("");
+    }
+    return "";
+  }
+  function pesanServer(data, mentah){
+    var e = data && data.error;
+    if (e){
+      if (typeof e === "string") return e;
+      if (e.message) return e.message;
+      try { return JSON.stringify(e); } catch(x){}
+    }
+    if (data && data.message) return String(data.message);
+    return (mentah || "").slice(0, 300);
+  }
+  function petunjukStatus(s){
+    if (s === 401 || s === 403) return " (API Key ditolak atau tidak punya akses)";
+    if (s === 404) return " (endpoint atau nama model tidak ditemukan, cek API URL)";
+    if (s === 429) return " (terlalu banyak permintaan atau kuota habis)";
+    if (s >= 500) return " (masalah di sisi server, coba lagi nanti)";
+    return "";
+  }
+
+  async function tanya(teks){
+    var p = baca(K_SET, {});
+    function gagal(pesan){
+      var g = gelembung("galat", pesan);
+      input.value = teks; ubahTinggi(); perbaruiTombol();
+      gulirKeJawaban(g);
+    }
+
+    if (!p.url || !p.key || !p.model) return gagal("API URL, API Key, dan model belum lengkap. Buka “Atur” dulu.");
+    if (/[^\x20-\x7E]/.test(p.key)) return gagal("API Key mengandung karakter tak valid (spasi atau karakter tak terlihat). Tempel ulang key di “Atur”.");
+    var url;
+    try { url = rapikanUrl(p.url); new URL(url); }
+    catch(e){ return gagal("API URL tidak valid. Contoh: https://api.openai.com/v1/chat/completions"); }
+
+    riwayat.push({ role:"user", content:teks });
+    var bSaya = gelembung("saya", teks);
+    var tunggu = gelembungMengetik();
+    gulirBawah(true);
+    setSibuk(true);
+
+    var c = new AbortController();
+    ctrl = c;
+    var habisWaktu = false;
+    var timer = setTimeout(function(){ habisWaktu = true; c.abort(); }, WAKTU_HABIS);
+
+    try {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "Authorization":"Bearer " + p.key },
+        body: JSON.stringify({ model:p.model, messages:riwayatUntukApi() }),
+        signal: c.signal
+      });
+      var mentah = await res.text();
+      var data = null;
+      try { data = JSON.parse(mentah); } catch(e){}
+
+      if (ctrl !== c) return; // dibatalkan lewat tombol Baru
+
+      if (!res.ok){
+        throw new Error("Server menjawab " + res.status + petunjukStatus(res.status) + ": " + pesanServer(data, mentah));
+      }
+      var jawab = ambilTeks(data);
+      if (!jawab){
+        throw new Error("Jawaban kosong atau formatnya tidak dikenali. Pastikan API URL adalah endpoint chat completions yang kompatibel dengan OpenAI.");
+      }
+
+      riwayat.push({ role:"assistant", content:jawab });
+      simpanRiwayat();
+      tunggu.className = "gel ai";
+      tunggu.removeAttribute("aria-label");
+      tunggu.textContent = jawab;
+      gulirKeJawaban(tunggu);
+    } catch(err){
+      if (ctrl !== c) return; // sudah direset oleh Baru
+      riwayat.pop();
+      bSaya.remove();
+      tunggu.remove();
+      var pesan;
+      if (err && err.name === "AbortError" && habisWaktu){
+        pesan = "Terlalu lama menunggu (60 detik). Pesan belum terkirim, coba lagi.";
+      } else if (err && err.name === "AbortError"){
+        return;
+      } else if (err && err.message === "Failed to fetch" || (err && err.name === "TypeError")){
+        pesan = "Tidak bisa menghubungi server. Cek koneksi internet, API URL, atau apakah server mengizinkan akses dari browser (CORS).";
+      } else {
+        pesan = (err && err.message) || "Terjadi kesalahan yang tidak diketahui.";
+      }
+      var g = gelembung("galat", pesan);
+      if (!input.value.trim()){ input.value = teks; ubahTinggi(); }
+      gulirKeJawaban(g);
+    } finally {
+      clearTimeout(timer);
+      if (ctrl === c){ ctrl = null; setSibuk(false); }
+    }
+  }
+
+  function proses(){
+    if (sibuk) return;
+    var teks = input.value.trim();
+    if (!teks) return;
+    input.value = "";
+    ubahTinggi();
+    perbaruiTombol();
+    tanya(teks);
+  }
+
+  /* ---------- event ---------- */
+  form.addEventListener("submit", function(e){ e.preventDefault(); proses(); });
+
+  var papanFisik = window.matchMedia && matchMedia("(pointer: fine)").matches;
+  input.addEventListener("keydown", function(e){
+    if (e.key === "Enter" && !e.isComposing){
+      if ((papanFisik && !e.shiftKey) || e.ctrlKey || e.metaKey){
+        e.preventDefault();
+        proses();
+      }
+    }
+  });
+  input.addEventListener("input", function(){ ubahTinggi(); perbaruiTombol(); });
+
+  $("btnAtur").addEventListener("click", function(){
+    var p = baca(K_SET, {});
+    inUrl.value = p.url || "";
+    inKey.value = p.key || "";
+    inModel.value = p.model || "";
+    dlg.showModal();
+  });
+  $("batal").addEventListener("click", function(){ dlg.close(); });
+  dlg.addEventListener("click", function(e){ if (e.target === dlg) dlg.close(); });
+  $("formAtur").addEventListener("submit", function(){
+    var ok = simpanLokal(K_SET, {
+      url: inUrl.value.trim(),
+      key: inKey.value.trim(),
+      model: inModel.value.trim()
+    });
+    if (!ok){
+      var g = gelembung("galat", "Pengaturan tidak bisa disimpan (penyimpanan browser diblokir, misalnya mode privat).");
+      gulirKeJawaban(g);
+    }
+  });
+
+  $("btnBaru").addEventListener("click", function(){
+    if (ctrl){ ctrl.abort(); ctrl = null; }
+    setSibuk(false);
+    riwayat = [];
+    hapusLokal(K_RIW);
+    tampilkanKosong("Percakapan baru", "Tulis pesan di bawah untuk mulai.");
+    scroller.scrollTop = 0;
+  });
+
+  /* ---------- awal ---------- */
+  var tersimpan = baca(K_RIW, []);
+  if (Array.isArray(tersimpan)){
+    riwayat = tersimpan.filter(function(m){
+      return m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string";
+    });
+  }
+  if (riwayat.length){
+    riwayat.forEach(function(m){
+      gelembung(m.role === "user" ? "saya" : "ai", m.content, false);
+    });
+    gulirBawah(false);
+  } else {
+    tampilkanKosong("Halo", "Atur API URL, key, dan model lewat “Atur”, lalu tanya apa saja.");
+  }
+  perbaruiTombol();
+})();
+</script>
+</body>
+</html>
